@@ -8,13 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-type Unpacker interface {
-	Unpack() string
-}
-
-type PackedString string
-
-func (s PackedString) Unpack() string {
+func Unpack(PackedString string) string {
 	var lastRune, lastLetter rune
 	var result, num strings.Builder
 	var esc bool
@@ -22,14 +16,12 @@ func (s PackedString) Unpack() string {
 	num.Reset()
 	lastRune = 0
 	lastLetter = 0
-	for i, curRune := range s {
+	for i, curRune := range PackedString {
 		// early return
 		if unicode.IsDigit(curRune) && i == 0 {
 			return ""
 		}
-		// if letter writing it to result and optionally unpacking previous sequence
 		if unicode.IsLetter(curRune) {
-			// letter after digit
 			if unicode.IsDigit(lastRune) {
 				numRunes, err := strconv.Atoi(num.String())
 				if err != nil {
@@ -40,28 +32,23 @@ func (s PackedString) Unpack() string {
 				}
 				num.Reset()
 			}
-			// any letter
 			result.WriteRune(curRune)
 			lastLetter = curRune
 			lastRune = curRune
 		}
-		// write to digit sequence or flush letters to result
 		if unicode.IsDigit(curRune) {
-			// escape digit
 			if esc {
 				result.WriteRune(curRune)
 				lastLetter = curRune
 				lastRune = curRune
 				esc = false
 			} else {
-				// first digit of new digit sequence
 				if unicode.IsLetter(lastRune) {
 					num.Reset()
 				}
 				num.WriteRune(curRune)
 				lastRune = curRune
-				// last digit in input string
-				if i == utf8.RuneCountInString(string(s))-1 {
+				if i == utf8.RuneCountInString(string(PackedString))-1 {
 					numRunes, err := strconv.Atoi(num.String())
 					if err != nil {
 						log.Fatal(err)
@@ -71,7 +58,6 @@ func (s PackedString) Unpack() string {
 					}
 				}
 			}
-
 		}
 		if curRune == '\\' {
 			if lastRune == '\\' {
@@ -79,7 +65,6 @@ func (s PackedString) Unpack() string {
 				lastLetter = curRune
 				lastRune = curRune
 				esc = false
-
 			} else {
 				esc = true
 				lastRune = curRune
@@ -87,5 +72,5 @@ func (s PackedString) Unpack() string {
 		}
 	}
 
-	return result.String()
+	return ""
 }
