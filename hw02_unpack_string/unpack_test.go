@@ -1,96 +1,49 @@
 package hw02unpackstring
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestUnpack001(t *testing.T) {
-	var ps PackedString
-	var got, want string
+func TestUnpack(t *testing.T) {
+	data := map[string]string{
+		"a4bc2d5e": "aaaabccddddde",
+		"abcd":     "abcd",
+	}
 
-	ps = "a4bc2d5e"
-	want = "aaaabccddddde"
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
+	for s, e := range data {
+		r, err := Unpack(s)
+		if err != nil {
+			t.Fatalf("bad unpack for %s: got error %v", s, err)
+		}
+		if r != e {
+			t.Fatalf("bad unpack for %s: got %v expected %v", s, r, e)
+		}
 	}
 }
 
-func TestUnpack002(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = "abcd"
-	want = "abcd"
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
+func TestUnpackError(t *testing.T) {
+	s := "45"
+	r, err := Unpack(s)
+	if r != "" {
+		t.Fatalf("bad unpack for %s: expected empty string", s)
+	}
+	if err == nil {
+		t.Fatalf("bad unpack for %s: expected error", s)
 	}
 }
 
-func TestUnpack003(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = "45"
-	want = ""
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
+func TestUnpackEscape(t *testing.T) {
+	data := map[string]string{
+		"qwe\\4\\5": "qwe45",
+		"qwe\\45":   "qwe44444",
+		"qwe\\\\5":  "qwe\\\\\\\\\\",
 	}
-}
 
-func TestUnpack004(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = `qwe\4\5`
-	want = `qwe45`
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
-	}
-}
-
-func TestUnpack005(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = `qwe\45`
-	want = `qwe44444`
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
-	}
-}
-
-func TestUnpack006(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = `qwe\\5`
-	want = `qwe\\\\\`
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
-	}
-}
-
-func TestUnpack007(t *testing.T) {
-	var ps PackedString
-	var got, want string
-
-	ps = `\\5`
-	want = `\\\\\`
-	got = ps.Unpack()
-
-	if got != want {
-		t.Errorf("ps.Unpack() == %q, want %q", got, want)
+	for s, e := range data {
+		r, err := Unpack(s)
+		if err != nil {
+			t.Fatalf("bad unpack for %s: got error %v", s, err)
+		}
+		if r != e {
+			t.Fatalf("bad unpack for %s: got %v expected %v", s, r, e)
+		}
 	}
 }

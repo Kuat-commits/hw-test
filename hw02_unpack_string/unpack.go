@@ -1,78 +1,34 @@
 package hw02unpackstring
 
 import (
-	"log"
+	"errors"
 	"strconv"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 )
 
-type PackedString string
+// Unpack выполняет распаковку строки, содержащую повторяющиеся символы.
+func Unpack(s string) (r string, err error) {
+	if _, err := strconv.Atoi(s); err == nil {
+		return r, errors.New("некорректная строка")
+	}
 
-func (s PackedString) Unpack() string {
-	var lastRune, lastLetter rune
-	var result, num strings.Builder
-	var esc bool
-	result.Reset()
-	num.Reset()
-	lastRune = 0
-	lastLetter = 0
-	for i, curRune := range s {
-		// early return
-		if unicode.IsDigit(curRune) && i == 0 {
-			return ""
-		}
-		if unicode.IsLetter(curRune) {
-			if unicode.IsDigit(lastRune) {
-				numRunes, err := strconv.Atoi(num.String())
-				if err != nil {
-					log.Fatal(err)
-				}
-				for j := 0; j < numRunes-1; j++ {
-					result.WriteRune(lastLetter)
-				}
-				num.Reset()
+	var prev rune
+	var escaped bool
+	var b strings.Builder
+	for _, char := range s {
+		if unicode.IsDigit(char) && !escaped {
+			m := int(char - '0')
+			r := strings.Repeat(string(prev), m-1)
+			b.WriteString(r)
+		} else {
+			escaped = string(char) == "\\" && string(prev) != "\\"
+			if !escaped {
+				b.WriteRune(char)
 			}
-			result.WriteRune(curRune)
-			lastLetter = curRune
-			lastRune = curRune
-		}
-		if unicode.IsDigit(curRune) {
-			if esc {
-				result.WriteRune(curRune)
-				lastLetter = curRune
-				lastRune = curRune
-				esc = false
-			} else {
-				if unicode.IsLetter(lastRune) {
-					num.Reset()
-				}
-				num.WriteRune(curRune)
-				lastRune = curRune
-				if i == utf8.RuneCountInString(string(s))-1 {
-					numRunes, err := strconv.Atoi(num.String())
-					if err != nil {
-						log.Fatal(err)
-					}
-					for j := 0; j < numRunes-1; j++ {
-						result.WriteRune(lastLetter)
-					}
-				}
-			}
-		}
-		if curRune == '\\' {
-			if lastRune == '\\' {
-				result.WriteRune(curRune)
-				lastLetter = curRune
-				lastRune = curRune
-				esc = false
-			} else {
-				esc = true
-				lastRune = curRune
-			}
+			prev = char
 		}
 	}
 
-	return result.String()
+	return b.String(), err
 }
