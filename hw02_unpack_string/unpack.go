@@ -8,7 +8,9 @@ import (
 	"unicode/utf8"
 )
 
-func Unpack(PackedString string) string {
+type PackedString string
+
+func (s PackedString) Unpack() string {
 	var lastRune, lastLetter rune
 	var result, num strings.Builder
 	var esc bool
@@ -16,7 +18,7 @@ func Unpack(PackedString string) string {
 	num.Reset()
 	lastRune = 0
 	lastLetter = 0
-	for i, curRune := range PackedString {
+	for i, curRune := range s {
 		// early return
 		if unicode.IsDigit(curRune) && i == 0 {
 			return ""
@@ -48,7 +50,7 @@ func Unpack(PackedString string) string {
 				}
 				num.WriteRune(curRune)
 				lastRune = curRune
-				if i == utf8.RuneCountInString(string(PackedString))-1 {
+				if i == utf8.RuneCountInString(string(s))-1 {
 					numRunes, err := strconv.Atoi(num.String())
 					if err != nil {
 						log.Fatal(err)
@@ -72,5 +74,5 @@ func Unpack(PackedString string) string {
 		}
 	}
 
-	return ""
+	return result.String()
 }
