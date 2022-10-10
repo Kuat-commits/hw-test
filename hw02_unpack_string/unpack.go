@@ -2,33 +2,39 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
 )
 
-// Unpack выполняет распаковку строки, содержащую повторяющиеся символы.
-func Unpack(s string) (r string, err error) {
-	if _, err := strconv.Atoi(s); err == nil {
-		return r, errors.New("некорректная строка")
-	}
-
-	var prev rune
-	var escaped bool
-	var b strings.Builder
-	for _, char := range s {
-		if unicode.IsDigit(char) && !escaped {
-			m := int(char - '0')
-			r := strings.Repeat(string(prev), m-1)
-			b.WriteString(r)
-		} else {
-			escaped = string(char) == "\\" && string(prev) != "\\"
-			if !escaped {
-				b.WriteRune(char)
+func Unpack(s string) (string, error) {
+	var unpack strings.Builder
+	var flagEscape bool
+	for i, value := range s {
+		switch {
+		case string(value) == `\` && !flagEscape:
+			flagEscape = true
+		case flagEscape:
+			unpack.WriteRune(value)
+			flagEscape = false
+		case unicode.IsDigit(value) && len(unpack.String()) > 0:
+			number, _ := strconv.Atoi(string(value))
+			if number == 0 {
+				str := []rune(unpack.String())
+				str = str[:len(str)-1]
+				unpack.Reset()
+				unpack.WriteString(string(str))
+			} else {
+				w := []rune(unpack.String())
+				w = w[len(w)-1:]
+				unpack.WriteString(strings.Repeat(string(w), number-1))
 			}
-			prev = char
+		case !unicode.IsDigit(value):
+			unpack.WriteRune(value)
+		default:
+			return "", errors.New(fmt.Sprintf("Something strange with unpacking string '%s' on character - %s, position - %d.", s, string(value), i))
 		}
 	}
-
-	return b.String(), err
+	return unpack.String(), nil
 }
