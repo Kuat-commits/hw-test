@@ -1,7 +1,6 @@
 package hw02unpackstring
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -33,7 +32,9 @@ func Unpack(s string) (string, error) {
 		case !unicode.IsDigit(value):
 			unpack.WriteRune(value)
 		default:
-			return "", errors.New(fmt.Sprintf("Something strange with unpacking string '%s' on character - %s, position - %d.", s, string(value), i))
+			return "", fmt.Errorf(fmt.Sprintf("Something strange with unpacking string"+
+				" '%s' on character - %s, position -"+
+				" %d.", s, string(value), i))
 		}
 	}
 	return unpack.String(), nil
