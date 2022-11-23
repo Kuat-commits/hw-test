@@ -1,7 +1,6 @@
 package hw02unpackstring
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -33,13 +32,48 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
-func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
-	for _, tc := range invalidStrings {
-		tc := tc
-		t.Run(tc, func(t *testing.T) {
-			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
-		})
+func TestUnpackNew(t *testing.T) {
+	data := map[string]string{
+		"a4bc2d5e": "aaaabccddddde",
+		"abcd":     "abcd",
+	}
+
+	for s, e := range data {
+		r, err := Unpack(s)
+		if err != nil {
+			t.Fatalf("bad unpack for %s: got error %v", s, err)
+		}
+		if r != e {
+			t.Fatalf("bad unpack for %s: got %v expected %v", s, r, e)
+		}
+	}
+}
+
+func TestUnpackError(t *testing.T) {
+	s := "45"
+	r, err := Unpack(s)
+	if r != "" {
+		t.Fatalf("bad unpack for %s: expected empty string", s)
+	}
+	if err == nil {
+		t.Fatalf("bad unpack for %s: expected error", s)
+	}
+}
+
+func TestUnpackEscape(t *testing.T) {
+	data := map[string]string{
+		"qwe\\4\\5": "qwe45",
+		"qwe\\45":   "qwe44444",
+		"qwe\\\\5":  "qwe\\\\\\\\\\",
+	}
+
+	for s, e := range data {
+		r, err := Unpack(s)
+		if err != nil {
+			t.Fatalf("bad unpack for %s: got error %v", s, err)
+		}
+		if r != e {
+			t.Fatalf("bad unpack for %s: got %v expected %v", s, r, e)
+		}
 	}
 }
