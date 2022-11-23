@@ -1,8 +1,10 @@
 package hw03frequencyanalysis
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -79,4 +81,28 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+}
+
+func TestTopEmptyString(t *testing.T) {
+	input := ""
+	var expected []string
+
+	result := Top10(input)
+	assert.Equal(t, expected, result)
+}
+
+func TestTopRangeMassive(t *testing.T) {
+	input := "cat and dog, one dog,two cats and one man"
+	expected := []string{
+		"and",
+		"one",
+		"cat",
+		"cats",
+		"dog,",
+		"dog,two",
+		"man",
+	}
+
+	result := Top10(input)
+	assert.Equal(t, expected, result, fmt.Sprintf("result len %d", len(result)))
 }
