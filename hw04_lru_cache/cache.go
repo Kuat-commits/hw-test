@@ -98,7 +98,6 @@ func NewCache(capacity int) Cache {
 	}
 	return cash
 }
-
 func (l *lruCache) printCash() []interface{} {
 	l.mux.Lock()
 	defer l.mux.Unlock()

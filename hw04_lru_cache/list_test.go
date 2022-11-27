@@ -20,6 +20,7 @@ func TestList(t *testing.T) {
 	})
 	t.Run("Negative test: Operations with empty list", func(t *testing.T) {
 		l := &list{}
+		l = nil
 		require.Panics(t, func() { l.Len() })
 		require.Panics(t, func() { l.Front() })
 		require.Panics(t, func() { l.Back() })
